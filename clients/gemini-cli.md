@@ -1,6 +1,23 @@
 # Gemini CLI
 
-## Server
+## Skills
+
+Gemini CLI loads Agent Skills natively. User skills live in `~/.gemini/skills/`, workspace
+skills in `.gemini/skills/` inside the repository, and the `.agents/skills/` alias is read
+at both tiers.
+
+```sh
+git clone https://github.com/kubevela/skills.git
+mkdir -p ~/.gemini/skills
+for s in kubevela-developer kubevela-sre kubevela-platform-engineer kubevela-defkit-author; do
+  ln -sfn "$PWD/skills/$s" ~/.gemini/skills/$s
+done
+```
+
+In a session, `/skills list` shows what was discovered and `/skills reload` picks up
+changes without restarting. Gemini CLI asks for consent before activating a skill.
+
+## Servers
 
 Add to `~/.gemini/settings.json`:
 
@@ -13,21 +30,16 @@ Add to `~/.gemini/settings.json`:
     },
     "kubernetes": {
       "command": "kubernetes-mcp-server",
-      "args": ["--read-only"]
+      "args": ["--config", "/etc/kubernetes-mcp-server/config.toml"]
+    },
+    "grafana": {
+      "command": "mcp-grafana",
+      "args": ["--disable-write"],
+      "env": {"GRAFANA_URL": "https://grafana.example.internal"}
     }
   }
 }
 ```
 
-Add your observability server alongside, following its vendor's instructions. Pin the
-versions listed in `pins/servers.yaml`.
-
-## Skills
-
-Gemini CLI loads instructions from `GEMINI.md` files. Until it supports the agentskills.io
-layout directly, reference the skills from your project's `GEMINI.md`:
-
-```markdown
-When working with KubeVela Applications, follow /path/to/skills/kubevela-developer/SKILL.md.
-When investigating incidents, follow /path/to/skills/kubevela-sre/SKILL.md.
-```
+The `kubevela` entry will not connect until `vela mcp` ships. The Kubernetes server's TOML
+is in `../kubevela-sre/servers/kubernetes.md`.

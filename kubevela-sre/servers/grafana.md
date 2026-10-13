@@ -1,21 +1,46 @@
 # Grafana MCP server
 
-Checked against: see `pins/servers.yaml` (`grafana`). Tool names below are from the
-upstream server's tool list and must be re-verified whenever the pin moves.
+Checked against: see `../references/servers.yaml` (`grafana`). Tool names below were read
+from the upstream server's tool table and must be re-verified whenever the pin moves.
 
 Server: https://github.com/grafana/mcp-grafana
 
+## Required configuration for the investigation profile
+
+Start the server with `--disable-write`. The server exposes dashboard, datasource,
+alerting and other write tools by default; the investigation profile must not have them.
+Scope the service account to Viewer-level read actions on the datasources you query.
+
+## Identity mapping
+
+Never query by component name alone. Two Applications in different namespaces can reuse
+a component name, and a query that matches both is misleading evidence. Establish the
+mapping once per incident and reuse it:
+
+| Level | KubeVela handle | Typical telemetry label after relabeling |
+|---|---|---|
+| Cluster | `cluster` | `cluster` |
+| Namespace | `namespace` | `namespace` |
+| Application | `labels["app.oam.dev/name"]` | `app_oam_dev_name` |
+| Component | `labels["app.oam.dev/component"]` | `app_oam_dev_component` |
+| Pod | `pods[]` | `pod` |
+
+Prometheus relabels dots and slashes to underscores, so the KubeVela labels usually
+appear as above. Confirm with one `query_prometheus` instant query before building the
+range query. If a level is not retained by the backend, say so in the report.
+
+## Tools by intent
+
 | Intent in the SRE sequence | Tool | Notes |
 |---|---|---|
-| Find the Prometheus and Loki datasources | `list_datasources` | Do this once per session and remember the UIDs |
-| Metrics for the window (step 2) | `query_prometheus` | Range query. Build the selector from the handles' labels, for example `{app_oam_dev_component="<component>", cluster="<cluster>"}`. Use `window.start` and `window.end` from the handles |
-| Logs behind the span (step 4) | `query_loki_logs` | Use the handles' `logSelector` as the stream selector; add a line filter for the failing span's target |
-| Log volume before reading lines | `query_loki_stats` | Cheap check that the selector matches something in the window |
-| Traces (step 3) | `query_tempo`, where available | Search by `traceService` and error status within the window. If the server version has no Tempo tool, say traces are unavailable |
-| Alert context | `list_alert_rules`, `get_alert_rule_by_uid` | Only to confirm what fired and when |
-| Dashboards | `search_dashboards` | For links in the report, not for evidence |
+| Find datasources | `list_datasources` | Once per session; remember the UIDs |
+| Metrics for the window | `query_prometheus` | Range query over `window.start` to `window.end` with the full identity selector, for example `{namespace="<ns>", app_oam_dev_name="<app>", app_oam_dev_component="<component>", cluster="<cluster>"}` |
+| Log volume before reading lines | `query_loki_stats` | Cheap check that the selector matches anything in the window |
+| Logs behind the span | `query_loki_logs` | Stream selector from `logSelector` plus the namespace; line filter for the failing span's target |
+| Trace search | `search_tempo_traces` | By `traceService`, error status, within the window |
+| Trace query | `query_tempo` | TraceQL for a specific span pattern once search has narrowed it |
+| Alert context | `list_alert_rules`, `get_alert_rule_by_uid` | Confirm what fired and when; use the first trigger time to tighten the window |
+| Dashboards | `search_dashboards` | Links for the report, not evidence |
 
-Label naming: KubeVela stamps `app.oam.dev/name`, `app.oam.dev/component` and
-`app.oam.dev/revision` on rendered resources. Prometheus relabels dots and slashes to
-underscores, so the metric label is usually `app_oam_dev_component`. Check with one
-`query_prometheus` instant query before building the range query.
+If a tool name here is absent from the server you are connected to, list its tools and
+pick the equivalent rather than guessing arguments. Report the substitution.

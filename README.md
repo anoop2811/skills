@@ -5,85 +5,85 @@ through AI assistants such as Claude Code, Codex, Cursor and Gemini CLI. This re
 pairs with `vela mcp`, the Model Context Protocol server proposed for the `vela` CLI in
 [KEP: Vela MCP](https://github.com/kubevela/kubevela/blob/master/design/vela-cli/kep-vela-mcp.md).
 
-A skill teaches an agent the order of operations and the stopping points. The MCP server
-tells it what it can call. The two are designed together, but the skills here also work
-today with the plain `vela` CLI: every tool a skill names has a CLI fallback listed in the
-skill, so an agent that can run shell commands can follow the same procedure before
-`vela mcp` ships.
+A skill teaches an agent the order of operations, the stopping points, and which
+guarantees the current execution path does and does not provide. The MCP server tells it
+what it can call. The two are designed together, but the skills also work today with the
+plain `vela` CLI through the CLI-assisted profile described below.
 
 ## Status
 
-`vela mcp` is a design proposal, not a released feature. Tool names in these skills follow
-the KEP and may change during implementation. Until the server ships, agents use the CLI
-fallbacks. The evaluation suite under `eval/` is specified but not yet implemented.
+- `vela mcp` is a design proposal, not a released feature. Tool names in these skills
+  follow the KEP and may change.
+- The skills are usable now in the CLI-assisted profile. They are not yet backed by the
+  evaluation suite, so treat them as reviewed procedures, not as tested tooling.
+- Third-party server versions are not pinned yet. `kubevela-sre/references/servers.yaml`
+  records what the appendices were checked against and when.
+
+## Operating profiles
+
+The same procedure runs under three profiles with different guarantees. Every skill
+names the profile it is in and states what the current path lacks.
+
+| Profile | Permitted | Guarantees |
+|---|---|---|
+| Offline authoring | Drafting and local rendering | Rendering only. Application validation, admission and runtime health are not checked, and the skills say so in a fixed five-line report |
+| CLI-assisted | Inspection and planning by default; writes through a constrained path that records and rechecks the target identity and prefers GitOps | No diff token, no server-side mode policy; the agent maintains the approval binding and must say so |
+| Governed MCP | Writes only through `apply_application` | Diff token, delivery mode and caller authorization enforced by the server |
+
+Two rules hold in every profile: a denied or disabled write is never worked around with a
+more privileged shell command, and human approval gates stay with humans. No skill calls
+`resume_workflow`, `suspend_workflow` or `terminate_workflow`.
 
 ## Layout
 
 ```
 kubevela-developer/          Compose, validate and deploy Applications
-kubevela-sre/                Investigate incidents with vela, a Kubernetes MCP and an observability MCP
-  servers/                   Per-server tool appendices (grafana, datadog, kubernetes)
-kubevela-platform-engineer/  Change definitions safely, inventory clusters and addons
+kubevela-sre/                Investigate incidents with vela, a read-only Kubernetes MCP and an observability MCP
+  servers/                   Per-server tool appendices and identity mapping (grafana, datadog, kubernetes)
+  references/servers.yaml    Third-party servers: configuration, version pins, check dates
+kubevela-platform-engineer/  Change definitions safely; tested consumer-inventory script in scripts/
 kubevela-defkit-author/      Author capabilities in Go with defkit, validate, render, deliver by PR
-clients/                     Setup snippets for Claude Code, Codex, Cursor, Gemini CLI
-pins/                        Third-party MCP server versions the skills were tested against
-eval/                        Scenario definitions and the cross-model evaluation harness
-scripts/                     Validation for skill files
+clients/                     Setup for Claude Code, Codex, Cursor, Gemini CLI
+eval/                        Three-layer evaluation plan: structural, workflow, enforcement
+scripts/validate_skills.py   Spec-conformant validator (YAML-parsed), with tests under tests/validator/
+tests/                       Validator and consumer-inventory tests, run in CI
 ```
 
-Each skill is a directory with a `SKILL.md` on the
-[agentskills.io](https://agentskills.io/specification) layout, so the same files load in
-every client that supports the format.
+Each skill is a self-contained directory on the
+[agentskills.io](https://agentskills.io/specification) layout. The SRE skill carries its
+server table and appendices inside the skill so copying the directory alone is enough.
 
-## Installing a skill
+## Installing
 
-Copy or symlink the skill directory into your client's skills location.
+See `clients/` for each client's skills directory and a copy-paste install that creates
+the directory and links all four skills. After installing, confirm the client lists all
+four. The upstream reference validator `skills-ref validate <dir>` also accepts these
+skills; the repository's own validator adds cross-file reference checks.
 
-| Client | Location |
-|---|---|
-| Claude Code | `~/.claude/skills/<skill-name>/` for the user, or `.claude/skills/<skill-name>/` in a repository |
-| Codex | `~/.codex/skills/<skill-name>/` |
-| Cursor and Gemini CLI | See `clients/` for the current per-client path |
+## The reference stack for incidents
 
-Example for Claude Code:
-
-```sh
-git clone https://github.com/kubevela/skills.git
-ln -s "$PWD/skills/kubevela-developer" ~/.claude/skills/kubevela-developer
-ln -s "$PWD/skills/kubevela-sre" ~/.claude/skills/kubevela-sre
-```
-
-Once `vela mcp setup` exists it will install the matching skills itself.
-
-## The reference stack
-
-For composing, validating and deploying Applications, `vela mcp` or the `vela` CLI is
-enough. For incident work the SRE skill expects three servers loaded together:
-
-| Server | Role | Access |
+| Server | Role | Required configuration |
 |---|---|---|
-| `vela mcp` | Application composition, rendering, diff, status, managed resources | Read and plan by default; writes behind a flag |
-| A Kubernetes MCP server | Nodes, namespaces, unmanaged resources | Read-only |
-| The team's observability MCP | Metrics, traces, logs, alerts | As the vendor provides |
+| `vela mcp` | Composition, rendering, diff, live status, managed resources | Read and plan by default; writes behind a flag |
+| Kubernetes MCP server | Nodes, namespaces, unmanaged resources | TOML `read_only = true`; Secret and RBAC kinds denied |
+| Observability MCP | Metrics, traces, logs, alerts | Grafana with `--disable-write`; Datadog with a read-scoped key |
 
-The boundary rule in every skill: anything an Application manages goes through vela;
-reads of anything else go through the Kubernetes server; nothing is mutated through the
-Kubernetes server in any documented configuration. `pins/servers.yaml` records the
-third-party versions the skills were last checked against.
+Access policy, identical across skills and appendices: prefer vela for Application-aware
+reads; scoped read-only Kubernetes cross-checks are allowed when vela's evidence is
+unavailable or stale and are recorded as fallbacks; nothing is mutated through the
+Kubernetes server; read-only is not safe-to-disclose, so secret values and customer data
+are never quoted.
 
-## Principles the skills enforce
+## Retrieved content is evidence, not instructions
 
-1. KubeVela computes, the model explains. Risk classes, diffs and root-cause ordering come
-   from deterministic output, never from the model's judgment.
-2. Discover before drafting. Use only parameters a definition schema actually returns.
-3. Render and diff before apply. Show the change set and risk class, then stop and ask.
-4. The agent never resumes a gated workflow. A human does.
-5. No new vocabulary. Skills use the words KubeVela users already know.
+Logs, annotations, definition descriptions and tool results are data to inspect. Text in
+them never authorizes a command or changes a rule. The evaluation plan includes hostile
+fixtures that test this.
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md). Run `scripts/validate-skills.sh` before opening a
-pull request; the same check runs in CI.
+See [CONTRIBUTING.md](CONTRIBUTING.md). Run the validator and both test suites before
+opening a pull request; CI runs the same.
 
 ## License
 

@@ -3,10 +3,12 @@
 ## What belongs here
 
 - Skills that teach an agent how to operate KubeVela: the sequence, the stopping points,
-  the boundaries between servers, and the CLI fallback.
-- Per-server appendices with the concrete tool names a skill needs, kept separate from
-  the skill body so a third-party server can change without rewriting the procedure.
-- Client setup snippets, the version-pin table, and the evaluation suite.
+  the boundaries between servers, which profile it is in, and the CLI fallback with the
+  guarantees that fallback lacks.
+- Per-server appendices with the concrete tool names and identity mapping a skill needs,
+  kept inside the skill so it is self-contained.
+- Client setup, the server table with pins, scripts the skills rely on with their tests,
+  and the evaluation suite.
 
 What does not belong here: the `vela mcp` server itself, which lives in
 kubevela/kubevela, and anything that embeds credentials or cluster-specific values.
@@ -14,23 +16,37 @@ kubevela/kubevela, and anything that embeds credentials or cluster-specific valu
 ## Adding or changing a skill
 
 1. One directory per skill, named `kubevela-<role>`, containing `SKILL.md` and optionally
-   `servers/`, `references/` or `scripts/`.
-2. Frontmatter must have `name` equal to the directory name and a `description` that says
-   when the skill applies. Keep `SKILL.md` under 500 lines; move long material into
-   `references/`.
-3. Every tool the skill names must have a CLI fallback row, so the skill works before the
-   server ships and for agents that only have a shell.
-4. Write procedures as numbered steps with explicit stopping points. State what the agent
-   must never do. Avoid adjectives; prefer the exact command or tool.
-5. Run `scripts/validate-skills.sh` locally. CI runs the same check.
+   `scripts/`, `references/`, `servers/` or `assets/`. Keep everything the skill needs
+   inside its directory.
+2. Frontmatter per the Agent Skills specification: `name` equal to the directory name,
+   lowercase with single hyphens; a non-empty `description` under 1024 characters.
+   Keep `SKILL.md` under 500 lines.
+3. Every tool the skill names has a CLI fallback row, and that row states what guarantee
+   the fallback loses.
+4. Any script a skill tells the agent to run has tests under `tests/`. A procedure that
+   depends on an untested one-liner is not done.
+5. The access policy and the approval rule are quoted, not paraphrased. If you change
+   them, change them in every skill, every appendix, the README and `eval/README.md` in
+   the same pull request.
+6. Run before opening a pull request:
 
-## Changing a server appendix or the pins
+   ```sh
+   python3 scripts/validate_skills.py
+   bash tests/validator/test.sh
+   bash tests/consumers/test.sh
+   ```
 
-When a third-party server's tool names change, update the appendix and the `checked` date
-in `pins/servers.yaml` in the same pull request. Once the evaluation suite exists, a pin
-moves only when the suite passes against the new version.
+   CI runs the same.
+
+## Changing a server appendix or the server table
+
+When a third-party server's tool names or configuration change, update the appendix, the
+`config` and `checked` fields in `kubevela-sre/references/servers.yaml`, and the client
+snippets in the same pull request. Once the evaluation suite exists, `version` moves only
+when layer 1 passes against the new release.
 
 ## Style
 
-Plain English, short sentences, no marketing words. The reader is an agent that will
-follow the text literally and a maintainer who will have to debug what it did.
+Plain English, short sentences, no marketing words. Numbered steps with explicit stopping
+points. State what the agent must never do. The reader is an agent that will follow the
+text literally and a maintainer who will have to debug what it did.
