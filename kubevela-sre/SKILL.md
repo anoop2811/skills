@@ -49,7 +49,10 @@ Confirm the cluster and namespaces in scope with the user. Every report names th
    root candidates, the impact list, the blocked workflow step, whether traffic changed,
    the `evidence` list and the `unknowns` list. Take the **handles**: `cluster`,
    `namespace`, `application`, `pods`, `labels`, `revision`, `appliedAt`, `window`,
-   `traceService`, `logSelector`. From here on every query uses them verbatim.
+   `traceService`, `logSelector`. From here on every query uses them verbatim. In the
+   CLI-assisted profile there are no `evidence` or `unknowns` lists and no handles: you
+   assemble them by hand from `vela status --tree --detail` and `vela revision list`, and
+   your report says they were assembled by hand.
 2. **Let the evidence choose the branch.** The root candidates decide what to query next.
    Pods that never scheduled call for scheduler events, not traces that cannot exist. A
    provider condition on a managed cloud resource calls for that resource's status, not
@@ -66,9 +69,11 @@ Confirm the cluster and namespaces in scope with the user. Every report names th
 6. **Managed resources through vela, cross-checks through Kubernetes** per the access
    policy. If you fall back to the Kubernetes server, write down why.
 7. **Correlate, then decide what you can claim.** Compare the revision's `appliedAt` with
-   the first change in the evidence. If you need the revision diff to support a claim,
-   fetch it: `get_application` for the previous revision and `diff_application`. Until
-   then the deployment is a hypothesis, not a cause.
+   the first change in the evidence. If the timeline points at the deployment, fetch the
+   revision diff before saying so: `get_application` for the previous revision, then
+   `diff_application` with its spec against the current one. The diff is what turns "the
+   deployment coincided with the change" into "this field changed". Until you have it,
+   the deployment is a hypothesis, not a cause.
 8. **Propose, do not perform, the remedy.** For a rollback, present the diff against the
    previous revision with its risk class and reasons. Stop and ask before
    `apply_application`. Rollbacks go through the same gate as any other change.
@@ -125,4 +130,8 @@ the source of truth for pins.
 | `get_managed_resource` | `vela status --tree` to find the object, then `kubectl get <kind> <name> -n <ns> -o yaml` in the cluster it names, with secret values redacted before quoting | Managed-scope enforcement |
 | `get_workflow` | `vela workflow status <name> -n <ns>` | None |
 | `get_logs` | `vela logs <name> -n <ns>` | Redaction and the truncation flag |
+| `get_application` for a previous revision | `vela revision list <name> -n <ns>` to find it, then `kubectl get applicationrevision <name>-v<N> -n <ns> -o jsonpath='{.spec.application}'` for that revision's Application spec | Envelope; the spec comes back as JSON, not the user's original YAML |
 | `diff_application` | `vela live-diff -f previous-revision.yaml` | Risk class and reasons |
+
+Third-party servers have no CLI equivalent in this table. Metrics, traces and log search
+need the observability server; without it, say that evidence is unavailable.

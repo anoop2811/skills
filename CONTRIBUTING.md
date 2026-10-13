@@ -21,8 +21,10 @@ kubevela/kubevela, and anything that embeds credentials or cluster-specific valu
 2. Frontmatter per the Agent Skills specification: `name` equal to the directory name,
    lowercase with single hyphens; a non-empty `description` under 1024 characters.
    Keep `SKILL.md` under 500 lines.
-3. Every tool the skill names has a CLI fallback row, and that row states what guarantee
-   the fallback loses.
+3. Every `vela mcp` tool the skill names has a CLI fallback row, and that row states what
+   guarantee the fallback loses. Third-party server tools have no CLI fallback; where a
+   skill depends on one, it says so explicitly and tells the agent what to report when
+   that server is not loaded.
 4. Any script a skill tells the agent to run has tests under `tests/`. A procedure that
    depends on an untested one-liner is not done.
 5. The access policy and the approval rule are quoted, not paraphrased. If you change

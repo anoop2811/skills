@@ -37,9 +37,10 @@ same write with more privilege.
    your first reply so the user can correct you if you are pointed at the wrong cluster.
    If the server reports version skew, say so.
 1. **Discover before drafting.** Call `list_definitions`, then `describe_definition` for
-   every component, trait and policy type you intend to use. Use only parameters present in
-   the returned schema. If a parameter you want is not there, say so instead of inventing it.
-   When the user asks what a definition does rather than what its parameters are, call
+   every component, trait, policy and workflow-step type you intend to use, including the
+   steps of any explicit workflow you write. Use only parameters present in the returned
+   schema. If a parameter you want is not there, say so instead of inventing it. When the
+   user asks what a definition does rather than what its parameters are, call
    `explain_definition`.
 2. **Render before showing.** Call `dryrun_application` with the full Application. If it
    returns field errors, fix them and call it again. Do not show the user YAML that has not
@@ -112,10 +113,10 @@ each command gives you and, in the last column, which guarantee of the MCP path 
 
 | Tool | CLI | Lost in the fallback |
 |---|---|---|
-| `get_platform_info` | `vela version`, `vela addon list`, `kubectl version -o json`, `kubectl config current-context` | Version-skew warnings |
-| `list_definitions` | `vela def list`, `vela components`, `vela traits` | None |
+| `get_platform_info` | `vela version`, `vela addon list`, `kubectl version -o json`, `kubectl config current-context`, and for feature gates `kubectl -n vela-system get deploy kubevela-vela-core -o jsonpath='{.spec.template.spec.containers[0].image}{"\n"}{.spec.template.spec.containers[0].args}'` | Version-skew warnings; gates must be read from the `--feature-gates` argument |
+| `list_definitions` | `vela def list`, `vela components`, `vela traits`, `vela workflow` step types via `vela def list -t workflow-step` | None |
 | `describe_definition` | `vela show <name>` | Current revision in the output |
-| `explain_definition` | `vela def get <name>`, then `vela dry-run --offline -d <def> -f sample.yaml` with a minimal Application | Evidence list; health rules must be read from the template |
+| `explain_definition` | `vela def get <name>` for the template, `kubectl get definitionrevisions -n vela-system \| grep <name>` for the revision history, then `vela dry-run --offline -d <def> -f sample.yaml` with a minimal Application for what it renders | Evidence list and consumer count; health rules must be read from the template |
 | `dryrun_application` | `vela dry-run -f app.yaml` (add `-d <dir>` for local definitions, `--offline` with no cluster) | With `--offline`: Application validation and admission |
 | `diff_application` | `vela live-diff -f app.yaml` | Risk class and reasons; the diff token |
 | `apply_application` | See "CLI-assisted writes" | Token binding, mode policy, server-side authorization check |
@@ -146,8 +147,10 @@ applied is yours to maintain. Do all of the following, in order, and skip none:
 > User: I need a Go API with Postgres and autoscaling in dev.
 
 You state the profile and the running version, list definitions, describe `webservice`,
-`postgres-rds` and `scaler`, draft the Application, dry-run it, fix the one field error,
-dry-run again and report the five render lines, diff it, and reply with the YAML, the four
-added resources, the risk class LOW with its reason, and the question "Deploy to dev?".
-Only after "yes" do you apply, and you report that the workflow is paused at the approval
-step with the command an approver runs.
+`postgres-rds` and `scaler`, draft the Application, dry-run it, fix whatever field errors
+it reports, dry-run again and report the five render lines, diff it, and reply with the
+YAML, the change set exactly as the diff returned it, the risk class and reasons exactly as
+returned, and the question "Deploy to dev?". Only after "yes" do you apply, and you report
+whichever mode the server actually used: the pull request you opened, the paused workflow
+and its resume command, or the live health and endpoints. Nothing in this example is a
+value to reproduce; the counts, class and mode come from the tool results every time.
