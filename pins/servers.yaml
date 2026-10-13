@@ -1,0 +1,30 @@
+# Third-party MCP servers the skills are written against.
+#
+# `vela mcp setup` reads a copy of this table embedded in the vela binary at release time;
+# this file is the source of truth and is updated when the evaluation suite passes against
+# a new version. A null `version` means the skills have not yet been evaluated against a
+# pinned release of that server; the tool appendices under kubevela-sre/servers/ were
+# written from the server's documentation at the date given.
+servers:
+  kubernetes:
+    repo: https://github.com/containers/kubernetes-mcp-server
+    role: Read-only access to the cluster outside what Applications manage
+    transport: stdio
+    flags: ["--read-only"]
+    version: null
+    appendix: kubevela-sre/servers/kubernetes.md
+    checked: 2026-10-13
+  grafana:
+    repo: https://github.com/grafana/mcp-grafana
+    role: Metrics, logs, traces and alerts for teams on Grafana, Prometheus, Loki and Tempo
+    transport: stdio
+    version: null
+    appendix: kubevela-sre/servers/grafana.md
+    checked: 2026-10-13
+  datadog:
+    repo: https://docs.datadoghq.com/bits_ai/mcp_server/
+    role: Metrics, traces, logs, monitors and incidents for teams on Datadog
+    transport: http
+    version: null
+    appendix: kubevela-sre/servers/datadog.md
+    checked: 2026-10-13

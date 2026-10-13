@@ -1,0 +1,14 @@
+name: validate
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  skills:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate skill files
+        run: bash scripts/validate-skills.sh
+      - name: Validate pins file
+        run: python3 -c "import yaml,sys; yaml.safe_load(open('pins/servers.yaml')); print('pins ok')"
