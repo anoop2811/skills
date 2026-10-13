@@ -18,11 +18,15 @@ retyping or guessing any identifier, and to change nothing while you investigate
 
 ## Sequence
 
+0. **Know what is running.** Once per session, call `get_platform_info` and keep the
+   result: vela-core version, CLI version, Kubernetes version per cluster, feature gates,
+   and any version-skew warning. Every report you write names these. If the server flags a
+   mismatch, say so before anything else; version skew is a common root cause.
 1. **Explain first.** Call `explain_application` for the affected Application. Read the
    root candidates, the impact list, the blocked workflow step, and whether traffic
-   changed. Take the **handles** from the response: `cluster`, `namespace`, `pods`,
-   `labels`, `revision`, `appliedAt`, `window`, `traceService`, `logSelector`. From here
-   on, every query uses these values verbatim.
+   changed. Read the `evidence` list and the `unknowns` list. Take the **handles** from the
+   response: `cluster`, `namespace`, `pods`, `labels`, `revision`, `appliedAt`, `window`,
+   `traceService`, `logSelector`. From here on, every query uses these values verbatim.
 2. **Metrics for the window.** Query request latency and error rate for the handles'
    labels over the handles' window. The server-specific tool is in `servers/`.
 3. **Traces for the failing path.** Search error traces for `traceService` in the window.
@@ -44,8 +48,11 @@ retyping or guessing any identifier, and to change nothing while you investigate
 ## Reporting
 
 Lead with the cause in one sentence, then the evidence in the order you gathered it, then
-the proposed remedy with its risk class. Name the revision, the component and the
-timestamps. Say what you did not check.
+the proposed remedy with its risk class. Every factual claim points at an object: the
+resource, the field or condition, and its timestamp, as returned in `evidence`. Repeat the
+server's `unknowns` as unknowns; do not fill them in. State the versions from
+`get_platform_info` and the `observedAt` time of the status you relied on. If any response
+had `truncated: true`, say what was cut. Say what you did not check.
 
 ## Never
 
@@ -72,6 +79,7 @@ repository root is the source of truth.
 
 | Tool | CLI |
 |---|---|
+| `get_platform_info` | `vela version`, `kubectl -n vela-system get deploy kubevela-vela-core -o jsonpath='{.spec.template.spec.containers[0].image}{"\n"}{.spec.template.spec.containers[0].args}'`, `kubectl version --short` per cluster, `vela addon list` |
 | `explain_application` | `vela status <name> -n <ns> --tree --detail`, then `kubectl get events` for each unhealthy resource it lists |
 | `get_managed_resource` | `vela status --tree` to find the object, then `kubectl get <kind> <name> -n <ns> -o yaml` in the cluster it names |
 | `get_workflow` | `vela workflow status <name> -n <ns>` |

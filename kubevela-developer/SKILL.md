@@ -17,9 +17,16 @@ will change, and hand control to a human before anything reaches a cluster.
 
 ## Always, in this order
 
+0. **Know what is running.** Once per session, call `get_platform_info` and note the
+   vela-core version and feature gates. Mention the version in your first reply so the
+   user can correct you if you are pointed at the wrong cluster. If the server reports
+   version skew, say so.
 1. **Discover before drafting.** Call `list_definitions`, then `describe_definition` for
    every component, trait and policy type you intend to use. Use only parameters present in
    the returned schema. If a parameter you want is not there, say so instead of inventing it.
+   When the user asks what a definition does rather than what its parameters are, call
+   `explain_definition`: it returns what the definition renders, which parameters drive
+   which fields, its health rules, restrictions and revision history, each with evidence.
 2. **Render before showing.** Call `dryrun_application` with the full Application. If it
    returns field errors, fix them and call it again. Do not show the user YAML that has not
    rendered cleanly.
@@ -63,8 +70,10 @@ procedure with the CLI. Treat the CLI output as the tool result.
 
 | Tool | CLI |
 |---|---|
+| `get_platform_info` | `vela version`, `vela addon list`, `kubectl version --short` |
 | `list_definitions` | `vela def list`, `vela components`, `vela traits` |
 | `describe_definition` | `vela show <name>` |
+| `explain_definition` | `vela def get <name>` for the template, then `vela dry-run --offline -d <def> -f sample.yaml` with a minimal Application to see what it renders |
 | `dryrun_application` | `vela dry-run -f app.yaml` (add `-d <dir>` for local definitions, `--offline` with no cluster) |
 | `diff_application` | `vela live-diff -f app.yaml` |
 | `apply_application` | Stop and ask. If the user confirms and the environment allows direct writes: `vela up -f app.yaml` |
