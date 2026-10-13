@@ -50,9 +50,13 @@ Confirm the cluster and namespaces in scope with the user. Every report names th
    the `evidence` list and the `unknowns` list. Take the **handles**: `cluster`,
    `namespace`, `application`, `pods`, `labels`, `revision`, `appliedAt`, `window`,
    `traceService`, `logSelector`. From here on every query uses them verbatim. In the
-   CLI-assisted profile there are no `evidence` or `unknowns` lists and no handles: you
-   assemble them by hand from `vela status --tree --detail` and `vela revision list`, and
-   your report says they were assembled by hand.
+   CLI-assisted profile there are no emitted `evidence` or `unknowns` lists. Derive the
+   Application handles (`cluster`, `namespace`, `application`, `pods`, `labels`,
+   `revision`, `appliedAt`) from `vela status --tree --detail` and `vela revision list`.
+   Take `window` from the alert's first trigger time and the revision's apply time, and
+   `traceService` and `logSelector` from the verified identity mapping in the server
+   appendix; where the mapping does not give one, report it unavailable rather than
+   inventing it. Your report says the handles were assembled by hand.
 2. **Let the evidence choose the branch.** The root candidates decide what to query next.
    Pods that never scheduled call for scheduler events, not traces that cannot exist. A
    provider condition on a managed cloud resource calls for that resource's status, not
