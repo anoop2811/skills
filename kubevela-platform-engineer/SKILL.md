@@ -15,6 +15,22 @@ a change to the definition changes what the floating consumers render on their n
 reconcile. Your job is to make that blast radius visible and correctly bounded before
 anything is applied, and to keep the catalog from sprawling.
 
+## Ground truth, in order
+
+Never describe a definition's fields, a revision's shape or an addon's parameters from
+memory. Look them up in this order and name the source when it matters.
+
+| Need | 1. Live, from the target | 2. Version-matched artifact | 3. Bundled snapshot |
+|---|---|---|---|
+| ComponentDefinition, TraitDefinition, PolicyDefinition, WorkflowStepDefinition fields | `kubectl explain componentdefinition.spec --recursive` and siblings; the live object via `vela def get <name>` | `charts/vela-core/crds/` in kubevela/kubevela at the tag from `get_platform_info` | `references/definition-shapes.md` |
+| DefinitionRevision and how references resolve | `kubectl get definitionrevisions -n vela-system`; `kubectl explain definitionrevision.spec` | same, plus the definition-versioning design in `design/vela-core/` at that tag | `references/definition-shapes.md` |
+| A definition's parameters and restrictions | `describe_definition`, `vela show <name>`, `vela def get <name>` | `vela-templates/definitions/internal/` for built-ins | none; always live |
+| Addon parameters and versions | `vela addon list`, `vela addon status <name>` | kubevela/catalog at the addon version shown | none |
+| Which gates govern definitions (restrictions, permission validation) | `get_platform_info` feature gates | release notes for that version | none |
+
+Compare the snapshot's `Source:` line with the running version. If the minor differs,
+prefer columns 1 and 2 and say so. Unreachable sources are reported, not guessed.
+
 ## Three numbers, never one
 
 Always distinguish, and report separately:

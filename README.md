@@ -41,20 +41,45 @@ more privileged shell command, and human approval gates stay with humans. No ski
 
 ```
 kubevela-developer/          Compose, validate and deploy Applications
+  references/                Application spec and status shape, generated from the v1.11.0 CRD
 kubevela-sre/                Investigate incidents with vela, a read-only Kubernetes MCP and an observability MCP
   servers/                   Per-server tool appendices and identity mapping (grafana, datadog, kubernetes)
-  references/servers.yaml    Third-party servers: configuration, version pins, check dates
+  references/                Status shapes generated from the CRDs; servers.yaml with pins and check dates
 kubevela-platform-engineer/  Change definitions safely; tested consumer-inventory script in scripts/
+  references/                The five definition CRDs and DefinitionRevision, generated
 kubevela-defkit-author/      Author capabilities in Go with defkit, validate, render, deliver by PR
+  references/                defkit API map, worked examples from vela-go-definitions, pitfalls
 clients/                     Setup for Claude Code, Codex, Cursor, Gemini CLI
 eval/                        Three-layer evaluation plan: structural, workflow, enforcement
-scripts/validate_skills.py   Spec-conformant validator (YAML-parsed), with tests under tests/validator/
+scripts/                     validate_skills.py, snapshot_crd_shape.py, snapshot-references.sh
 tests/                       Validator and consumer-inventory tests, run in CI
 ```
 
 Each skill is a self-contained directory on the
 [agentskills.io](https://agentskills.io/specification) layout. The SRE skill carries its
 server table and appendices inside the skill so copying the directory alone is enough.
+
+## How the skills know the real shapes
+
+A skill is only as accurate as its knowledge of what an Application status, a workflow
+step phase, a definition CRD or the defkit API looks like on the cluster in front of it.
+Every skill therefore has a "Ground truth, in order" section that tells the agent where to
+look, from most to least authoritative:
+
+1. **The live target.** `kubectl explain ... --recursive`, `vela show`, `vela def get`,
+   `go doc` against the module's pinned version. These describe what is actually running.
+2. **Version-matched artifacts.** The CRDs under `charts/vela-core/crds/`, the built-in
+   definitions under `vela-templates/definitions/`, and the design documents in
+   kubevela/kubevela at the tag reported by `get_platform_info`; vela-go-definitions at
+   a commit pinning the same kubevela version.
+3. **Bundled snapshots.** Each skill's `references/` directory holds shapes generated from
+   the CRDs at a pinned release by `scripts/snapshot-references.sh`, and for defkit an API
+   map, worked examples and pitfalls. Every file carries a `Source:` line with the version
+   it came from. The agent compares that with the running version and falls back to the
+   first two sources when the minor version differs.
+
+Snapshots are regenerated, never edited. When the pinned KubeVela version moves, run
+`scripts/snapshot-references.sh <kubevela-checkout> <tag>` and commit the result.
 
 ## Installing
 

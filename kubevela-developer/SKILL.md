@@ -30,6 +30,23 @@ An authorization denial or a disabled write tool is a decision, not an obstacle.
 fall back from a denied or absent MCP write to a shell command that would perform the
 same write with more privilege.
 
+## Ground truth, in order
+
+Never write a field name, parameter or phase value from memory. Look it up, in this
+order, and say which source you used when it matters.
+
+| Need | 1. Live, from the target | 2. Version-matched artifact | 3. Bundled snapshot |
+|---|---|---|---|
+| Application fields, status phases, workflow step phases | `kubectl explain application.spec` and `kubectl explain application.status --recursive` against the target cluster | `charts/vela-core/crds/core.oam.dev_applications.yaml` in kubevela/kubevela at the tag from `get_platform_info` | `references/application-shape.md` |
+| Definition parameters, defaults, required fields | `describe_definition`, or `vela show <name>` | `vela-templates/definitions/internal/` at that tag for built-ins | none; definitions are always read live |
+| CLI flags and behaviour | `vela <command> --help` from the installed CLI | docs for the same minor version at kubevela.io | none |
+| Which features exist on this cluster | `get_platform_info` feature gates and version | release notes for that version | none |
+
+The bundled snapshot carries a `Source:` line with the KubeVela version it was generated
+from. Compare it with the version from step 0 below. If the minor version differs, use
+columns 1 and 2 and note the mismatch in your reply. If a source is unreachable, say so
+rather than filling the gap from memory.
+
 ## Always, in this order
 
 0. **Know what is running.** Once per session, call `get_platform_info` and note the

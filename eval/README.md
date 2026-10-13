@@ -21,6 +21,8 @@ Does everything load and resolve, before any model is involved?
 - Every CLI command in a fallback table exists on the pinned `vela` and `kubectl`
   versions. `kubectl version -o json` passes; `kubectl version --short` would have failed.
 - The consumer inventory script passes `tests/consumers/`.
+- Every reference snapshot's `Source:` line names the pinned KubeVela version, and
+  regenerating with `scripts/snapshot-references.sh` at that tag produces no diff.
 
 Gate: all pass. Output: a compatibility matrix of client version, server version,
 configuration and tool-schema hash, published per release.

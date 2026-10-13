@@ -37,6 +37,23 @@ evaluation rules. Where a document seems to say otherwise, this section wins.
    customer data in logs and sensitive annotations may come back from a read. Do not quote
    them. Summarise that they exist, and redact values in anything you write.
 
+## Ground truth, in order
+
+Never state a phase, condition type or field name from memory. Look it up in this order
+and record the source in the report when a claim depends on it.
+
+| Need | 1. Live, from the target | 2. Version-matched artifact | 3. Bundled snapshot |
+|---|---|---|---|
+| Application and ApplicationRevision status, workflow step phases | `kubectl explain application.status --recursive`; the live object via `get_application` or `kubectl get application <n> -o yaml` | `charts/vela-core/crds/` in kubevela/kubevela at the tag from `get_platform_info` | `references/status-shapes.md` |
+| ResourceTracker and Workflow spec | `kubectl explain resourcetracker.spec`, `kubectl explain workflow.spec` | same | `references/status-shapes.md` |
+| Provider and operator resource conditions (Crossplane, Terraform, others) | `kubectl explain <kind>.status` on the cluster that runs them; the live object through `get_managed_resource` | the provider's CRDs at its installed version | none |
+| Telemetry labels and tag names | one probe query against the observability server | the server appendix's identity mapping | `servers/grafana.md`, `servers/datadog.md`, `servers/kubernetes.md` |
+| Which features and gates are on | `get_platform_info` | release notes for that version | none |
+
+The bundled snapshot's `Source:` line names the KubeVela version it came from. If the
+running minor version differs, prefer columns 1 and 2 and say so. If a source is
+unreachable, report the gap under contradicting or missing evidence.
+
 ## Preflight, once per session
 
 Call `get_platform_info` and record: vela-core and CLI versions, Kubernetes version per
