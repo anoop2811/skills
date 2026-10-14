@@ -61,7 +61,8 @@ examples file shows this pattern.
   `defkit.ConvertString(v)`, `defkit.InlineArray(map)`, `defkit.ArrayConcat(a, b)`,
   comparisons `Eq`, `Ge`, `Gt`, `Le`, logical `And`, `AllConditions`, raw `CUEExpr(s)`.
 - Typed objects: `defkit.FromTyped(runtime.Object)` exists, but the examples build output
-  with `NewResource` and paths so definitions do not pin a Kubernetes API version.
+  with `NewResource` and paths to avoid a dependency on Kubernetes Go types; the API
+  version is still explicit, as the first argument of `NewResource`.
 
 ## Collections and helpers
 

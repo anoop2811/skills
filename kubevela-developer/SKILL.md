@@ -37,7 +37,8 @@ order, and say which source you used when it matters.
 
 | Need | 1. Live, from the target | 2. Version-matched artifact | 3. Bundled snapshot |
 |---|---|---|---|
-| Application fields, status phases, workflow step phases | `kubectl explain application.spec` and `kubectl explain application.status --recursive` against the target cluster | `charts/vela-core/crds/core.oam.dev_applications.yaml` in kubevela/kubevela at the tag from `get_platform_info` | `references/application-shape.md` |
+| Application fields | `kubectl explain application.spec --recursive` and `kubectl explain application.status --recursive` against the target cluster | `charts/vela-core/crds/core.oam.dev_applications.yaml` in kubevela/kubevela at the tag from `get_platform_info` | `references/application-shape.md` |
+| Phase values for Applications and workflow steps | the live object for what is observed now (`get_application`, `get_workflow`); the schema only types these fields as strings | the constants in kubevela/kubevela at that tag: `apis/core.oam.dev/common/types.go` for Application phases, `api/v1alpha1/types.go` in kubevela/workflow for step phases | the values quoted in `references/application-shape.md` descriptions, where the CRD lists them |
 | Definition parameters, defaults, required fields | `describe_definition`, or `vela show <name>` | `vela-templates/definitions/internal/` at that tag for built-ins | none; definitions are always read live |
 | CLI flags and behaviour | `vela <command> --help` from the installed CLI | docs for the same minor version at kubevela.io | none |
 | Which features exist on this cluster | `get_platform_info` feature gates and version | release notes for that version | none |
@@ -138,7 +139,7 @@ each command gives you and, in the last column, which guarantee of the MCP path 
 | `diff_application` | `vela live-diff -f app.yaml` | Risk class and reasons; the diff token |
 | `apply_application` | See "CLI-assisted writes" | Token binding, mode policy, server-side authorization check |
 | `get_application` | `vela status <name> -n <ns>`, `vela status <name> --endpoint` | Envelope with `observedAt` and `source` |
-| `explain_application` | `vela status <name> -n <ns> --tree --detail`, then `kubectl get events -n <ns> --field-selector involvedObject.name=<resource>` for each unhealthy resource it lists; for anything beyond a first look, switch to the `kubevela-sre` skill | Evidence list, unknowns, dependency ordering and handles; say they were assembled by hand |
+| `explain_application` | `vela status <name> -n <ns> --tree --detail`, then `kubectl get events -n <ns> --field-selector involvedObject.kind=<kind>,involvedObject.name=<name>` for each unhealthy resource it lists, with the kind taken from the tree so same-named objects of another kind do not mix in; for anything beyond a first look, switch to the `kubevela-sre` skill | Evidence list, unknowns, dependency ordering and handles; say they were assembled by hand |
 | `get_workflow` | `vela workflow status <name> -n <ns>` | None |
 | `list_clusters`, `list_addons` | `vela cluster list`, `vela addon list` | None |
 

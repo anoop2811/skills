@@ -123,6 +123,8 @@ func Scaler() *defkit.TraitDefinition {
                 Patch().Set("spec.replicas", replicas)
         })
 }
+
+func init() { defkit.Register(Scaler()) }
 ```
 
 ## Policy: apply-once (policies/apply_once.go, abridged)
@@ -166,6 +168,8 @@ func Suspend() *defkit.WorkflowStepDefinition {
                 Build()
         })
 }
+
+func init() { defkit.Register(Suspend()) }
 ```
 
 ## Test pattern (components/worker_test.go, abridged)

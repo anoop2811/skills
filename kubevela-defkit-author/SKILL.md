@@ -24,7 +24,7 @@ use the nearest example's approach rather than guessing.
 
 | Need | 1. Authoritative for your version | 2. Worked examples | 3. Bundled reference |
 |---|---|---|---|
-| Builder and method signatures | `go doc github.com/oam-dev/kubevela/pkg/definition/defkit` and `go doc .../defkit <Name>`, resolved against the kubevela version in the module's `go.mod` | kubevela/vela-go-definitions at a commit whose `go.mod` pins the same kubevela version | `references/api-map.md` |
+| Builder and method signatures | `go doc github.com/oam-dev/kubevela/pkg/definition/defkit` for the index and `go doc github.com/oam-dev/kubevela/pkg/definition/defkit <Name>` for one builder, resolved against the kubevela version in the module's `go.mod` | kubevela/vela-go-definitions at a commit whose `go.mod` pins the same kubevela version | `references/api-map.md` |
 | How a kind of definition is written end to end | the scaffold from `vela addon init <name> --godef ...` on the installed CLI | the file in vela-go-definitions closest to what you are building, see `references/examples.md` for the index | `references/examples.md` |
 | Test patterns and matchers | `go doc github.com/oam-dev/kubevela/pkg/definition/defkit/testing/matchers` | `*_test.go` beside each example | `references/examples.md` |
 | Design intent and limits | `design/vela-cli/kep-defkit.md` in kubevela/kubevela | | `references/pitfalls.md` |

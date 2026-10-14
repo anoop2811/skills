@@ -44,10 +44,12 @@ and record the source in the report when a claim depends on it.
 
 | Need | 1. Live, from the target | 2. Version-matched artifact | 3. Bundled snapshot |
 |---|---|---|---|
-| Application and ApplicationRevision status, workflow step phases | `kubectl explain application.status --recursive`; the live object via `get_application` or `kubectl get application <n> -o yaml` | `charts/vela-core/crds/` in kubevela/kubevela at the tag from `get_platform_info` | `references/status-shapes.md` |
-| ResourceTracker and Workflow spec | `kubectl explain resourcetracker.spec`, `kubectl explain workflow.spec` | same | `references/status-shapes.md` |
+| Application status and workflow step phases | `kubectl explain application.status --recursive`; the live object via `get_application` or `kubectl get application <n> -o yaml` | `charts/vela-core/crds/` in kubevela/kubevela at the tag from `get_platform_info` | `references/status-shapes.md` |
+| ApplicationRevision status | `kubectl explain applicationrevision.status --recursive`; the live object via `kubectl get applicationrevision <n>-v<N> -n <ns> -o yaml` | same | `references/status-shapes.md` |
+| Phase and condition values, not just field names | the constants in kubevela/kubevela at that tag: `apis/core.oam.dev/common/types.go` for Application phases, `api/v1alpha1/types.go` in kubevela/workflow for step phases; the live object for what is observed now | same | the values quoted in `references/status-shapes.md` descriptions, where the CRD lists them |
+| ResourceTracker and Workflow spec | `kubectl explain resourcetracker.spec --recursive`, `kubectl explain workflow --recursive` (Workflow declares `steps` and `mode` at the top level, not under `spec`) | same | `references/status-shapes.md` |
 | Provider and operator resource conditions (Crossplane, Terraform, others) | `kubectl explain <kind>.status` on the cluster that runs them; the live object through `get_managed_resource` | the provider's CRDs at its installed version | none |
-| Telemetry labels and tag names | one probe query against the observability server | the server appendix's identity mapping | `servers/grafana.md`, `servers/datadog.md`, `servers/kubernetes.md` |
+| Telemetry labels and tag names | one probe query against the observability server | the server appendix's identity mapping | `servers/grafana.md`, `servers/datadog.md` |
 | Which features and gates are on | `get_platform_info` | release notes for that version | none |
 
 The bundled snapshot's `Source:` line names the KubeVela version it came from. If the
@@ -68,8 +70,11 @@ Confirm the cluster and namespaces in scope with the user. Every report names th
    `namespace`, `application`, `pods`, `labels`, `revision`, `appliedAt`, `window`,
    `traceService`, `logSelector`. From here on every query uses them verbatim. In the
    CLI-assisted profile there are no emitted `evidence` or `unknowns` lists. Derive the
-   Application handles (`cluster`, `namespace`, `application`, `pods`, `labels`,
-   `revision`, `appliedAt`) from `vela status --tree --detail` and `vela revision list`.
+   Application handles (`cluster`, `namespace`, `application`, `labels`, `revision`,
+   `appliedAt`) from `vela status <name> -n <ns> --tree --detail` and
+   `vela revision list <name> -n <ns>`, and `pods` from `vela status <name> -n <ns> --pod`,
+   which is the only status view that lists them. If `--pod` returns nothing, report the
+   `pods` handle unavailable.
    Take `window` from the alert's first trigger time and the revision's apply time, and
    `traceService` and `logSelector` from the verified identity mapping in the server
    appendix; where the mapping does not give one, report it unavailable rather than
@@ -147,7 +152,7 @@ the source of truth for pins.
 | Tool | CLI | Lost in the fallback |
 |---|---|---|
 | `get_platform_info` | `vela version`, `kubectl -n vela-system get deploy kubevela-vela-core -o jsonpath='{.spec.template.spec.containers[0].image}{"\n"}{.spec.template.spec.containers[0].args}'`, `kubectl version -o json`, `vela addon list` | Version-skew warnings |
-| `explain_application` | `vela status <name> -n <ns> --tree --detail`, then `kubectl get events -n <ns> --field-selector involvedObject.name=<resource>` for each unhealthy resource it lists | Evidence list, unknowns, dependency ordering; you assemble the handles by hand and must say so |
+| `explain_application` | `vela status <name> -n <ns> --tree --detail`, `vela status <name> -n <ns> --pod`, then `kubectl get events -n <ns> --field-selector involvedObject.kind=<kind>,involvedObject.name=<name>` for each unhealthy resource the tree lists, with the kind taken from the tree so same-named objects of another kind do not mix in | Evidence list, unknowns, dependency ordering; you assemble the handles by hand and must say so |
 | `get_managed_resource` | `vela status --tree` to find the object, then `kubectl get <kind> <name> -n <ns> -o yaml` in the cluster it names, with secret values redacted before quoting | Managed-scope enforcement |
 | `get_workflow` | `vela workflow status <name> -n <ns>` | None |
 | `get_logs` | `vela logs <name> -n <ns>` | Redaction and the truncation flag |

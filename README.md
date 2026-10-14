@@ -66,17 +66,22 @@ step phase, a definition CRD or the defkit API looks like on the cluster in fron
 Every skill therefore has a "Ground truth, in order" section that tells the agent where to
 look, from most to least authoritative:
 
-1. **The live target.** `kubectl explain ... --recursive`, `vela show`, `vela def get`,
-   `go doc` against the module's pinned version. These describe what is actually running.
+1. **The live target.** `kubectl explain ... --recursive`, `vela show` and `vela def get`
+   describe the cluster that is actually running. For defkit, the authoritative source is
+   the API of the pinned module instead: `go doc` resolved against the kubevela version in
+   the module's `go.mod`, which describes the SDK the code will compile against, not the
+   cluster.
 2. **Version-matched artifacts.** The CRDs under `charts/vela-core/crds/`, the built-in
    definitions under `vela-templates/definitions/`, and the design documents in
    kubevela/kubevela at the tag reported by `get_platform_info`; vela-go-definitions at
    a commit pinning the same kubevela version.
 3. **Bundled snapshots.** Each skill's `references/` directory holds shapes generated from
    the CRDs at a pinned release by `scripts/snapshot-references.sh`, and for defkit an API
-   map, worked examples and pitfalls. Every file carries a `Source:` line with the version
-   it came from. The agent compares that with the running version and falls back to the
-   first two sources when the minor version differs.
+   map, worked examples and pitfalls. The generated shapes, the API map and the examples
+   carry a `Source:` line with the version or commit they came from; the pitfalls are
+   version-independent guidance and `servers.yaml` records the date each server's tool
+   list was checked. The agent compares a `Source:` version with the running version and
+   falls back to the first two sources when the minor version differs.
 
 Snapshots are regenerated, never edited. When the pinned KubeVela version moves, run
 `scripts/snapshot-references.sh <kubevela-checkout> <tag>` and commit the result.
