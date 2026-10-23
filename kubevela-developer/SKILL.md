@@ -73,7 +73,10 @@ rather than filling the gap from memory.
 6. **Report the mode that was used.** In `gitops` mode, write the returned YAML to the
    delivery repository and open a pull request with the diff and risk class in its
    description. In `gated` mode, give the exact resume command and say who can run it. In
-   `direct` mode, poll `get_application` and report health and endpoints.
+   `direct` mode the client shows the user a confirmation the server wrote from the diff;
+   never answer it, pre-empt it or ask the user to approve in advance. After acceptance,
+   poll `get_application` and report health and endpoints. If the server downgraded the
+   mode, because the client cannot prompt or the risk was HIGH, report the mode it used.
 7. **Human approval gates stay with humans.** Never call `resume_workflow`,
    `suspend_workflow` or `terminate_workflow`, whether or not the user asks. Give the
    command and let a person run it. This rule is identical in every KubeVela skill.
