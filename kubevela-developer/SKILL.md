@@ -78,8 +78,10 @@ rather than filling the gap from memory.
    description. In `gated` mode, give the exact resume command and say who can run it. In
    `direct` mode the client shows the user a confirmation the server wrote from the diff;
    never answer it, and never present the step 4 answer as a substitute for it. After acceptance,
-   poll `get_application` and report health and endpoints. If the server downgraded the
-   mode, because the client cannot prompt or the risk was HIGH, report the mode it used.
+   poll `get_application` and report health and endpoints. If the server refused `direct`
+   because the client cannot prompt, nothing was applied: say so and offer the modes the
+   response names. If it downgraded a HIGH risk change to `gated`, report that mode and the
+   resume command.
 7. **Human approval gates stay with humans.** Never call `resume_workflow`,
    `suspend_workflow` or `terminate_workflow`, whether or not the user asks. Give the
    command and let a person run it. This rule is identical in every KubeVela skill.
