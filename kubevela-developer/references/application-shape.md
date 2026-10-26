@@ -16,7 +16,7 @@ Source: kubevela v1.11.0 (charts/vela-core/crds)
     - `spec.components[].outputs[].name` string required
     - `spec.components[].outputs[].valueFrom` string required
   - `spec.components[].properties` object (free-form)
-  - `spec.components[].scopes` object (free-form): scopes in ApplicationComponent defines the component-level scopes the format is <scope-type:scope-instance-name> pairs, the key represents type of `ScopeDefi...
+  - `spec.components[].scopes` map[string]string: scopes in ApplicationComponent defines the component-level scopes the format is <scope-type:scope-instance-name> pairs, the key represents type of `ScopeDefi...
   - `spec.components[].traits` []object: Traits define the trait of one component, the type must be array to keep the order.
     - `spec.components[].traits[].properties` object (free-form)
     - `spec.components[].traits[].type` string required
@@ -115,7 +115,7 @@ Source: kubevela v1.11.0 (charts/vela-core/crds)
   - `status.policy[].type` string required
 - `status.services` []object: Services record the status of the application services
   - `status.services[].cluster` string
-  - `status.services[].details` object
+  - `status.services[].details` map[string]string
   - `status.services[].env` string
   - `status.services[].healthy` boolean required
   - `status.services[].message` string
@@ -130,7 +130,7 @@ Source: kubevela v1.11.0 (charts/vela-core/crds)
     - `status.services[].scopes[].resourceVersion` string: Specific resourceVersion to which this reference is made, if any.
     - `status.services[].scopes[].uid` string: UID of the referent.
   - `status.services[].traits` []object
-    - `status.services[].traits[].details` object
+    - `status.services[].traits[].details` map[string]string
     - `status.services[].traits[].healthy` boolean required
     - `status.services[].traits[].message` string
     - `status.services[].traits[].pending` boolean

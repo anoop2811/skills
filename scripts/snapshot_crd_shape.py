@@ -45,8 +45,29 @@ def has_children(schema):
         return False
     if schema.get("properties"):
         return True
-    items = schema.get("items")
-    return isinstance(items, dict) and bool(items.get("properties"))
+    for key in ("items", "additionalProperties"):
+        sub = schema.get(key)
+        if isinstance(sub, dict) and (sub.get("properties") or has_children(sub)):
+            return True
+    return False
+
+
+def map_value(schema):
+    """Return the value schema of a typed map, or None when the field is not one."""
+    extra = schema.get("additionalProperties")
+    if isinstance(extra, dict) and not schema.get("properties"):
+        return extra
+    return None
+
+
+def type_name(schema):
+    typ = schema.get("type") or ("object" if "properties" in schema else "any")
+    if typ == "array":
+        return "[]" + type_name(schema.get("items") or {})
+    value = map_value(schema) if typ == "object" else None
+    if value is not None:
+        return "map[string]" + type_name(value)
+    return typ
 
 
 def walk(schema, path, depth, max_depth, out, required_here):
@@ -56,13 +77,12 @@ def walk(schema, path, depth, max_depth, out, required_here):
     required = set(schema.get("required") or [])
     for name in sorted(props):
         sub = props[name]
-        typ = sub.get("type") or ("object" if "properties" in sub else "any")
-        child = sub
-        if typ == "array":
-            items = sub.get("items") or {}
-            ityp = items.get("type") or ("object" if "properties" in items else "any")
-            typ = f"[]{ityp}"
-            child = items
+        typ = type_name(sub)
+        child, seg = sub, ""
+        if typ.startswith("[]"):
+            child, seg = sub.get("items") or {}, "[]"
+        elif typ.startswith("map[string]"):
+            child, seg = map_value(sub), "[key]"
         if sub.get("x-kubernetes-preserve-unknown-fields") and typ in ("object", "any"):
             typ = "object (free-form)"
         flag = " required" if name in required else ""
@@ -73,10 +93,7 @@ def walk(schema, path, depth, max_depth, out, required_here):
             suffix += f" (fields below depth {max_depth} omitted; see `kubectl explain` or the CRD)"
         out.append(f"{'  ' * depth}- `{full}` {typ}{flag}{suffix}")
         if depth < max_depth:
-            if typ.startswith("[]"):
-                walk(child, full + "[]", depth + 1, max_depth, out, required)
-            else:
-                walk(child, full, depth + 1, max_depth, out, required)
+            walk(child, full + seg, depth + 1, max_depth, out, required)
 
 
 def main():

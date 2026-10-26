@@ -66,15 +66,18 @@ rather than filling the gap from memory.
 3. **Diff before applying.** Call `diff_application`. Present the change set per resource
    and the risk class exactly as returned, including every reason listed. Never describe a
    change as safe in your own words; quote the class.
-4. **Stop.** Ask the user to confirm. Do not call `apply_application` in the same turn as
-   the diff, even if the user asked for a deploy up front.
+4. **Stop.** Ask the user whether to go ahead with the apply in the mode that will be used.
+   Do not call `apply_application` in the same turn as the diff, even if the user asked for
+   a deploy up front. In `direct` mode this answer only decides whether to submit; the
+   change itself is confirmed in the client's prompt in step 6, so say that the user will
+   be asked again there.
 5. **Apply with the token.** `apply_application` requires the token from the diff you
    showed. If the Application, the target or the context changed since, diff again first.
 6. **Report the mode that was used.** In `gitops` mode, write the returned YAML to the
    delivery repository and open a pull request with the diff and risk class in its
    description. In `gated` mode, give the exact resume command and say who can run it. In
    `direct` mode the client shows the user a confirmation the server wrote from the diff;
-   never answer it, pre-empt it or ask the user to approve in advance. After acceptance,
+   never answer it, and never present the step 4 answer as a substitute for it. After acceptance,
    poll `get_application` and report health and endpoints. If the server downgraded the
    mode, because the client cannot prompt or the risk was HIGH, report the mode it used.
 7. **Human approval gates stay with humans.** Never call `resume_workflow`,

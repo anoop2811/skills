@@ -56,7 +56,7 @@ Source: kubevela v1.11.0 (charts/vela-core/crds)
   - `status.policy[].type` string required
 - `status.services` []object: Services record the status of the application services
   - `status.services[].cluster` string
-  - `status.services[].details` object
+  - `status.services[].details` map[string]string
   - `status.services[].env` string
   - `status.services[].healthy` boolean required
   - `status.services[].message` string
@@ -71,7 +71,7 @@ Source: kubevela v1.11.0 (charts/vela-core/crds)
     - `status.services[].scopes[].resourceVersion` string: Specific resourceVersion to which this reference is made, if any.
     - `status.services[].scopes[].uid` string: UID of the referent.
   - `status.services[].traits` []object
-    - `status.services[].traits[].details` object
+    - `status.services[].traits[].details` map[string]string
     - `status.services[].traits[].healthy` boolean required
     - `status.services[].traits[].message` string
     - `status.services[].traits[].pending` boolean
@@ -162,7 +162,7 @@ Source: kubevela v1.11.0 (charts/vela-core/crds)
   - `status.workflow.suspend` boolean required
   - `status.workflow.suspendState` string
   - `status.workflow.terminated` boolean required
-- `status.workflowContext` object: Record the context values to the revision.
+- `status.workflowContext` map[string]string: Record the context values to the revision.
 
 ## ResourceTracker (core.oam.dev/v1beta1, cluster-scoped)
 

@@ -80,8 +80,11 @@ look, from most to least authoritative:
    map, worked examples and pitfalls. The generated shapes, the API map and the examples
    carry a `Source:` line with the version or commit they came from; the pitfalls are
    version-independent guidance and `servers.yaml` records the date each server's tool
-   list was checked. The agent compares a `Source:` version with the running version and
-   falls back to the first two sources when the minor version differs.
+   list was checked. The agent compares each `Source:` with the version it describes: the
+   CRD snapshots with the vela-core version running on the cluster, and the defkit API map
+   and examples with the kubevela version pinned in the definition module's `go.mod`,
+   since that is the SDK the code compiles against. It falls back to the first two sources
+   when the minor version differs.
 
 Snapshots are regenerated, never edited. When the pinned KubeVela version moves, run
 `scripts/snapshot-references.sh <kubevela-checkout> <tag>` and commit the result.

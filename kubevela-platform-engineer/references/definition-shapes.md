@@ -8,7 +8,7 @@ Source: kubevela v1.11.0 (charts/vela-core/crds)
 - `spec.childResourceKinds` []object: ChildResourceKinds are the list of GVK of the child resources this workload generates
   - `spec.childResourceKinds[].apiVersion` string required: APIVersion of the child resource
   - `spec.childResourceKinds[].kind` string required: Kind of the child resource
-  - `spec.childResourceKinds[].selector` object: Selector to select the child resources that the workload wants to expose to traits
+  - `spec.childResourceKinds[].selector` map[string]string: Selector to select the child resources that the workload wants to expose to traits
 - `spec.extension` object (free-form): Extension is used for extension needs by OAM platform builders
 - `spec.podSpecPath` string: PodSpecPath indicates where/if this workload has K8s podSpec field if one workload has podSpec, trait can do lot's of assumption such as port, env, volume fi...
 - `spec.revisionLabel` string: RevisionLabel indicates which label for underlying resources(e.g.
@@ -203,16 +203,16 @@ Source: kubevela v1.11.0 (charts/vela-core/crds)
   - `spec.componentDefinition.apiVersion` string: APIVersion defines the versioned schema of this representation of an object.
   - `spec.componentDefinition.kind` string: Kind is a string value representing the REST resource this object represents.
   - `spec.componentDefinition.metadata` object
-    - `spec.componentDefinition.metadata.annotations` object
+    - `spec.componentDefinition.metadata.annotations` map[string]string
     - `spec.componentDefinition.metadata.finalizers` []string
-    - `spec.componentDefinition.metadata.labels` object
+    - `spec.componentDefinition.metadata.labels` map[string]string
     - `spec.componentDefinition.metadata.name` string
     - `spec.componentDefinition.metadata.namespace` string
   - `spec.componentDefinition.spec` object: ComponentDefinitionSpec defines the desired state of ComponentDefinition
     - `spec.componentDefinition.spec.childResourceKinds` []object: ChildResourceKinds are the list of GVK of the child resources this workload generates
       - `spec.componentDefinition.spec.childResourceKinds[].apiVersion` string required: APIVersion of the child resource
       - `spec.componentDefinition.spec.childResourceKinds[].kind` string required: Kind of the child resource
-      - `spec.componentDefinition.spec.childResourceKinds[].selector` object: Selector to select the child resources that the workload wants to expose to traits
+      - `spec.componentDefinition.spec.childResourceKinds[].selector` map[string]string: Selector to select the child resources that the workload wants to expose to traits
     - `spec.componentDefinition.spec.extension` object (free-form): Extension is used for extension needs by OAM platform builders
     - `spec.componentDefinition.spec.podSpecPath` string: PodSpecPath indicates where/if this workload has K8s podSpec field if one workload has podSpec, trait can do lot's of assumption such as port, env, volume fi...
     - `spec.componentDefinition.spec.revisionLabel` string: RevisionLabel indicates which label for underlying resources(e.g.
@@ -261,9 +261,9 @@ Source: kubevela v1.11.0 (charts/vela-core/crds)
   - `spec.policyDefinition.apiVersion` string: APIVersion defines the versioned schema of this representation of an object.
   - `spec.policyDefinition.kind` string: Kind is a string value representing the REST resource this object represents.
   - `spec.policyDefinition.metadata` object
-    - `spec.policyDefinition.metadata.annotations` object
+    - `spec.policyDefinition.metadata.annotations` map[string]string
     - `spec.policyDefinition.metadata.finalizers` []string
-    - `spec.policyDefinition.metadata.labels` object
+    - `spec.policyDefinition.metadata.labels` map[string]string
     - `spec.policyDefinition.metadata.name` string
     - `spec.policyDefinition.metadata.namespace` string
   - `spec.policyDefinition.spec` object: PolicyDefinitionSpec defines the desired state of PolicyDefinition
@@ -311,9 +311,9 @@ Source: kubevela v1.11.0 (charts/vela-core/crds)
   - `spec.traitDefinition.apiVersion` string: APIVersion defines the versioned schema of this representation of an object.
   - `spec.traitDefinition.kind` string: Kind is a string value representing the REST resource this object represents.
   - `spec.traitDefinition.metadata` object
-    - `spec.traitDefinition.metadata.annotations` object
+    - `spec.traitDefinition.metadata.annotations` map[string]string
     - `spec.traitDefinition.metadata.finalizers` []string
-    - `spec.traitDefinition.metadata.labels` object
+    - `spec.traitDefinition.metadata.labels` map[string]string
     - `spec.traitDefinition.metadata.name` string
     - `spec.traitDefinition.metadata.namespace` string
   - `spec.traitDefinition.spec` object: A TraitDefinitionSpec defines the desired state of a TraitDefinition.
@@ -368,9 +368,9 @@ Source: kubevela v1.11.0 (charts/vela-core/crds)
   - `spec.workflowStepDefinition.apiVersion` string: APIVersion defines the versioned schema of this representation of an object.
   - `spec.workflowStepDefinition.kind` string: Kind is a string value representing the REST resource this object represents.
   - `spec.workflowStepDefinition.metadata` object
-    - `spec.workflowStepDefinition.metadata.annotations` object
+    - `spec.workflowStepDefinition.metadata.annotations` map[string]string
     - `spec.workflowStepDefinition.metadata.finalizers` []string
-    - `spec.workflowStepDefinition.metadata.labels` object
+    - `spec.workflowStepDefinition.metadata.labels` map[string]string
     - `spec.workflowStepDefinition.metadata.name` string
     - `spec.workflowStepDefinition.metadata.namespace` string
   - `spec.workflowStepDefinition.spec` object: WorkflowStepDefinitionSpec defines the desired state of WorkflowStepDefinition
