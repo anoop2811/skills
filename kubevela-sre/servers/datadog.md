@@ -21,7 +21,7 @@ Never query by component name alone. Establish the mapping once per incident:
 | Cluster | `clusters[]` | `kube_cluster_name` |
 | Namespace | `namespace` | `kube_namespace` |
 | Application | `labels["app.oam.dev/name"]` | `kube_app_oam_dev_name` or a custom tag your integration maps |
-| Component | `labels["app.oam.dev/component"]` | `kube_app_oam_dev_component` or a custom tag |
+| Component | `componentLabels[<component>]["app.oam.dev/component"]` | `kube_app_oam_dev_component` or a custom tag |
 | Pod | `pods[].name` | `pod_name` |
 | Service for traces | not emitted | `service`; usable only after the probe below finds spans |
 
@@ -30,8 +30,8 @@ Tag names depend on how the Kubernetes integration maps pod labels. Confirm with
 If a level is not present as a tag, say so in the report.
 
 Nothing maps an Application to an APM service name. Probe with `search_datadog_spans` for
-`kube_namespace:<namespace>` and the pod names in the window and read the `service` of the
-spans returned. Use that service only if the probe returns spans; otherwise report traces
+`kube_cluster_name:(<c1> OR <c2>) kube_namespace:<namespace>` and the pod names in the
+window, with every cluster in `clusters`, and read the `service` of the spans returned. Use that service only if the probe returns spans; otherwise report traces
 unavailable rather than guessing.
 
 ## Tools by intent

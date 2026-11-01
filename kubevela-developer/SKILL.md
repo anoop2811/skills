@@ -54,11 +54,21 @@ Follow the practice already in place and never steer. Find out what that practic
 
 - **Governed MCP:** call `get_platform_info` with the namespace the user is working in and
   read its `practice`.
-- **CLI-assisted:** read the same facts with read-only commands: `kubectl get applications
-  -n <ns> --no-headers` for Applications, `kubectl get deploy,sts,ds,cronjob -n <ns> -l
-  '!app.oam.dev/name' --no-headers` for workloads no Application manages, `kubectl get ns
-  <ns> -o jsonpath='{.metadata.labels.app\.oam\.dev/delivery-default}'` for a declared
-  default, and `kubectl auth can-i create deployments -n <ns>`.
+- **CLI-assisted:** read the same facts with read-only commands:
+  - KubeVela installed: `kubectl get crd applications.core.oam.dev`. If it is absent,
+    KubeVela is not installed.
+  - Applications: `kubectl get applications -n <ns> --no-headers`.
+  - Workloads no Application manages: `kubectl get deploy,sts,ds,cronjob,job -n <ns> -l
+    '!app.oam.dev/name' -o custom-columns=KIND:.kind,NAME:.metadata.name,OWNER:.metadata.ownerReferences[0].kind
+    --no-headers`. Ignore Jobs with an owner; their CronJob already counts.
+  - Declared default: `kubectl get ns <ns> -o
+    jsonpath='{.metadata.labels.app\.oam\.dev/delivery-default}'`.
+  - Permission for plain manifests: `kubectl auth can-i create <resource> -n <ns>` for
+    every kind the manifests would contain, not only Deployments.
+
+  Name the practice the way the server does: `kubevela` with Applications and no unmanaged
+  workloads, `kubernetes` with unmanaged workloads and no Applications, `mixed` with both,
+  `empty` with neither.
 - **Offline authoring:** there is no cluster, so decide from the request and the repository
   alone.
 
@@ -78,7 +88,9 @@ look at the repository and apply the first rule that fits:
    deploying it as a KubeVela Application: you describe the service or database you need
    and the platform's components create the Kubernetes objects. Or I can write plain
    Kubernetes manifests. Which would you like?" If `canCreatePlainWorkloads` is false,
-   do not offer plain manifests; say the platform deploys through KubeVela.
+   do not offer plain manifests; say the platform deploys through KubeVela. That field
+   covers Deployments only: before offering manifests with other kinds, check them with
+   `kubectl auth can-i` where the CLI is available, or say which kinds were not checked.
 
 When the answer is plain Kubernetes (an existing Deployment or chart, a `kubernetes`
 practice or default, or the user's choice), stop here: this skill and the steps below do

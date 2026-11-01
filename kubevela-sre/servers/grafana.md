@@ -43,13 +43,19 @@ traces unavailable rather than guessing a service.
 | Intent in the SRE sequence | Tool | Notes |
 |---|---|---|
 | Find datasources | `list_datasources` | Once per session; remember the UIDs |
-| Metrics for the window | `query_prometheus` | Range query over `window.from` to `window.to` with the full identity selector, for example `{namespace="<ns>", app_oam_dev_name="<app>", app_oam_dev_component="<component>", cluster=~"<c1>\|<c2>"}` |
+| Metrics for the window | `query_prometheus` | Range query over `window.from` to `window.to` with the full identity selector shown below this table |
 | Log volume before reading lines | `query_loki_stats` | Cheap check that the selector matches anything in the window |
 | Logs behind the span | `query_loki_logs` | Stream selector built from `metricLabels` and the namespace, for example `{namespace="team-a", app_oam_dev_name="shop"}`; line filter for the failing span's target |
 | Trace search | `search_tempo_traces` | Only for a service the probe confirmed; error status, within `window` |
 | Trace query | `query_tempo` | TraceQL for a specific span pattern once search has narrowed it |
 | Alert context | `list_alert_rules`, `get_alert_rule_by_uid` | Confirm what fired and when; use the first trigger time to tighten the window |
 | Dashboards | `search_dashboards` | Links for the report, not evidence |
+
+The full identity selector for an Application in two clusters:
+
+```promql
+{namespace="<ns>", app_oam_dev_name="<app>", app_oam_dev_component="<component>", cluster=~"<c1>|<c2>"}
+```
 
 If a tool name here is absent from the server you are connected to, list its tools and
 pick the equivalent rather than guessing arguments. Report the substitution.
