@@ -50,31 +50,48 @@ rather than filling the gap from memory.
 
 ## First, decide whether this is KubeVela work
 
-Follow the practice already in place and never steer. Call `get_platform_info` with the
-namespace the user is working in, read its `practice`, and look at the repository. Then
-apply the first rule that fits:
+Follow the practice already in place and never steer. Find out what that practice is:
+
+- **Governed MCP:** call `get_platform_info` with the namespace the user is working in and
+  read its `practice`.
+- **CLI-assisted:** read the same facts with read-only commands: `kubectl get applications
+  -n <ns> --no-headers` for Applications, `kubectl get deploy,sts,ds,cronjob -n <ns> -l
+  '!app.oam.dev/name' --no-headers` for workloads no Application manages, `kubectl get ns
+  <ns> -o jsonpath='{.metadata.labels.app\.oam\.dev/delivery-default}'` for a declared
+  default, and `kubectl auth can-i create deployments -n <ns>`.
+- **Offline authoring:** there is no cluster, so decide from the request and the repository
+  alone.
+
+If a fact cannot be read, say the practice is unknown and ask rather than choosing. Then
+look at the repository and apply the first rule that fits:
 
 1. **The user named an approach.** Do exactly that, without comment.
-2. **They are changing something that exists.** Keep its current form. A plain Deployment
-   or chart stays as it is and this skill does not apply.
-3. **New work next to existing practice.** Follow it: Applications in the repository or a
+2. **They ask to migrate, in either direction.** Propose the conversion and show it as a
+   diff before anything changes. Never suggest migrating unprompted.
+3. **They are changing something that exists.** Keep its current form.
+4. **New work next to existing practice.** Follow it: Applications in the repository or a
    `kubevela` style mean an Application; plain manifests, charts or a `kubernetes` style
    mean plain manifests. For `mixed`, follow what sits next to the new work, or ask.
-4. **A blank start, with KubeVela installed.** If `declaredDefault` is set, use it and say
+5. **A blank start, with KubeVela installed.** If `declaredDefault` is set, use it and say
    so. Otherwise ask once, suggesting KubeVela, and remember the answer for the project:
    "This is a new project and KubeVela is installed on your cluster. I'd suggest
    deploying it as a KubeVela Application: you describe the service or database you need
    and the platform's components create the Kubernetes objects. Or I can write plain
    Kubernetes manifests. Which would you like?" If `canCreatePlainWorkloads` is false,
    do not offer plain manifests; say the platform deploys through KubeVela.
-5. **They ask to migrate, in either direction.** Propose the conversion and show it as a
-   diff before anything changes. Never suggest migrating unprompted.
+
+When the answer is plain Kubernetes (an existing Deployment or chart, a `kubernetes`
+practice or default, or the user's choice), stop here: this skill and the steps below do
+not apply. Write plain manifests in the repository's conventions and deliver them the way
+the repository already does. No KubeVela tool writes plain objects, so never use
+`apply_application` or `vela up` for them.
 
 If KubeVela is not installed, do not suggest installing it.
 
 ## Always, in this order
 
-0. **Know what is running.** Once per session, call `get_platform_info` and note the
+0. **Know what is running.** Skip this offline. Otherwise, once per session, call
+   `get_platform_info` and note the
    vela-core version, the feature gates and the cluster or context name. Mention them in
    your first reply so the user can correct you if you are pointed at the wrong cluster.
    If the server reports version skew, say so.
@@ -87,10 +104,11 @@ If KubeVela is not installed, do not suggest installing it.
 
    **When more than one definition could serve,** such as two that provide `postgres`,
    call `list_definitions` with `provides` and the namespace. If one is marked `default`,
-   use it and name the alternatives. If only one fits, use it. If none is default and
-   they differ in cost, ownership or where data lives, ask the user in chat, showing for
-   each its description, what `explain_definition` says it creates, and how many
-   Applications use it. Never choose between them silently.
+   use it and name the alternatives. If only one fits, use it. If several fit and none is
+   default, ask the user in chat, showing for each its description, what
+   `explain_definition` says it creates, and how many Applications use it. Definitions
+   without a `provides` label are still candidates: compare their descriptions. Never
+   choose between them silently.
 2. **Render before showing.** Call `dryrun_application` with the full Application. If it
    returns field errors, fix them and call it again. Do not show the user YAML that has not
    rendered cleanly, and report the render with the four-line status below.

@@ -17,8 +17,10 @@ each client's format.
 - The four skills work today in the CLI-assisted profile: the agent runs `vela` and
   `kubectl` and follows the same procedure. Each skill states which guarantees that
   profile lacks.
-- `vela mcp` is in review in kubevela/kubevela and is not in a release yet. Build `vela`
-  from that branch to try it; `vela mcp config` then prints a working entry.
+- `vela mcp` is in review in kubevela/kubevela#7503 and is not in a release yet. To try
+  it, build `vela` from that pull request's branch, `feat/vela-mcp` on
+  github.com/anoop2811/kubevela, with `make vela-cli`; `vela mcp config` then prints a
+  working entry.
 - Third-party server versions are not yet pinned; see
   `../kubevela-sre/references/servers.yaml`. Until a version is recorded there, install
   the current release of each server and expect tool names in the appendices to need

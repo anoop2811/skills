@@ -69,9 +69,11 @@ incomplete; never present a partial count as the blast radius.
 
 ## Before adding a definition
 
-Label what it provides with `definition.oam.dev/provides` (for example `postgres`) when
-another definition serves the same need, and name the namespaces where it is the default
-in the `definition.oam.dev/default-for` annotation, or `*` for everywhere. Agents use these
+Label every definition with what it provides, `definition.oam.dev/provides` (for example
+`postgres`), even when nothing else serves the same need yet, so a later alternative is
+filtered alongside it rather than hiding it. Where several provide the same thing, name
+the namespaces where one is the default in the `definition.oam.dev/default-for`
+annotation, or `*` for everywhere. Agents use these
 to pick the default and to ask users between alternatives instead of guessing. Set the
 namespace label `app.oam.dev/delivery-default` to `kubevela` or `kubernetes` where the
 platform has decided how new work is delivered.

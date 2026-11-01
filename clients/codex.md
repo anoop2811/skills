@@ -29,8 +29,11 @@ vela mcp config
 ```toml
 [mcp_servers.kubevela]
 command = "/absolute/path/printed/by/vela"
-args = ["mcp"]
+args = ["mcp", "--namespace", "team-a"]
 ```
+
+Copy `args` exactly as printed, including every server flag; the example above is what
+`vela mcp config --namespace team-a` prints.
 
 Start Codex from a shell pointed at the cluster you mean: the server uses the kubeconfig
 and context of the client process that starts it.

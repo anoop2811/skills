@@ -22,11 +22,17 @@ absolute path and any server flags you add, such as `--namespace team-a` or
 `--allow-write --direct-namespace dev`. Nothing is written for you; Claude Code's own command writes its configuration:
 
 ```sh
-claude mcp add kubevela -- $(vela mcp config --format command)
+eval "claude mcp add --scope user kubevela -- $(vela mcp config --format command)"
 ```
 
-Run it from a shell pointed at the cluster you mean: the server uses the kubeconfig and
-context of the client process that starts it.
+`--format command` prints the server command shell-quoted, and `eval` is what keeps a
+`vela` path with spaces in it as one argument. `--scope user` makes the server available
+in every project; drop it to register it for the current repository only.
+
+Claude Code starts the server with its own environment, so the cluster is whichever one
+the shell that started Claude Code points at, not the one you ran `claude mcp add` from.
+To pin a kubeconfig regardless of the shell, add `-e KUBECONFIG=/absolute/path` before
+`kubevela` in the command.
 
 ## Companion servers
 
