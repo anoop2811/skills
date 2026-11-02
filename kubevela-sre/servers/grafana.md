@@ -21,7 +21,7 @@ mapping once per incident and reuse it:
 |---|---|---|
 | Cluster | `clusters[]` | `cluster` |
 | Namespace | `namespace` | `namespace` |
-| Application | `metricLabels["app_oam_dev_name"]` | `app_oam_dev_name` |
+| Application | `metricLabels["app_oam_dev_name"]` and `metricLabels["app_oam_dev_namespace"]` | `app_oam_dev_name`, `app_oam_dev_namespace` |
 | Component | `componentLabels[<component>]["app.oam.dev/component"]` | `app_oam_dev_component` |
 | Pod | `pods[].name` | `pod` |
 | Service for traces | not emitted | Tempo's `service.name`; usable only after the probe below finds spans |

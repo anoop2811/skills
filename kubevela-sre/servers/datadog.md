@@ -20,7 +20,7 @@ Never query by component name alone. Establish the mapping once per incident:
 |---|---|---|
 | Cluster | `clusters[]` | `kube_cluster_name` |
 | Namespace | `namespace` | `kube_namespace` |
-| Application | `labels["app.oam.dev/name"]` | `kube_app_oam_dev_name` or a custom tag your integration maps |
+| Application | `labels["app.oam.dev/name"]` and `labels["app.oam.dev/namespace"]` | `kube_app_oam_dev_name`, `kube_app_oam_dev_namespace`, or custom tags your integration maps |
 | Component | `componentLabels[<component>]["app.oam.dev/component"]` | `kube_app_oam_dev_component` or a custom tag |
 | Pod | `pods[].name` | `pod_name` |
 | Service for traces | not emitted | `service`; usable only after the probe below finds spans |

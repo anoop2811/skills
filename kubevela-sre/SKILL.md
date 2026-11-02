@@ -83,7 +83,8 @@ Confirm the cluster and namespaces in scope with the user. Every report names th
    `vela revision list <name> -n <ns>`, and `pods` from `vela status <name> -n <ns> --pod`,
    which is the only status view that lists them; if `--pod` returns nothing, report the
    `pods` handle unavailable. Rebuild the label handles the way the server does: `labels`
-   is `app.oam.dev/name=<application>`, `labelSelector` is that pair in selector syntax,
+   is `app.oam.dev/name=<application>` and `app.oam.dev/namespace=<namespace>`,
+   `labelSelector` is those pairs in selector syntax,
    `componentLabels[<component>]` adds `app.oam.dev/component=<component>`, and
    `metricLabels` are the same pairs with every character other than letters, digits and
    `_` in the key replaced by `_`.
