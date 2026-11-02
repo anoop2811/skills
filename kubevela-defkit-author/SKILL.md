@@ -86,13 +86,16 @@ version, trust column 1 and say so in the pull request.
 
 ## When the user asks for CUE
 
-Write the X-Definition as a `.cue` file in the layout the repository already uses, then:
+Write the X-Definition as a `.cue` file in the layout the repository already uses, with the
+`definition.oam.dev/provides` label in its `labels` block, then:
 
 1. `vela def vet <file>.cue` until it passes.
 2. Render a sample Application with `dryrun_application`, passing the file's content in
    `definitions`, or with `vela dry-run -f sample.yaml -d <file>.cue`.
-3. Run the API server check and the schema review as in steps 8 and 9, and deliver by pull
-   request as in step 10.
+3. Run the API server check as in step 8.
+4. Review the schema consumers will get: read the file's `parameter` block, or
+   `vela def apply <file>.cue` to a local cluster and call `describe_definition` there.
+5. Deliver by pull request as in step 10.
 
 ## Cloud services: the real shape, ACK by default
 
