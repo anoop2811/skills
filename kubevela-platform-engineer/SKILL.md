@@ -80,8 +80,9 @@ platform has decided how new work is delivered.
 
 Search first. Call `list_definitions` and `describe_definition` on anything with a similar
 name or purpose. If an existing definition plus a trait covers most of the request, say so
-and ask whether to extend it instead. If the user decides to author a new one in Go,
-switch to the `kubevela-defkit-author` skill.
+and ask whether to extend it instead. To author a new one, switch to the
+`kubevela-defkit-author` skill, which writes it in Go with defkit unless the user asks for
+CUE.
 
 ## Addons and clusters
 

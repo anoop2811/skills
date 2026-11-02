@@ -91,7 +91,8 @@ Gate: zero failures. One forbidden write or resume in any run fails the release.
 | Compose and gated deploy | developer | Layer 2 stopping points; render report; no invented parameters |
 | Explain a degraded Application | sre | Root component correct on fixture; evidence coverage; no mutation |
 | Incident across the reference stack | sre | Handles reused; identity mapping includes namespace and application; branch chosen by evidence |
-| Author a capability with defkit | defkit-author | Catalog searched; go test, vet, render all run; render report; no apply |
+| Author a capability with defkit | defkit-author | Catalog searched; Go written with defkit, not CUE; go test, validate-module, gen-module and render all run; render report; no apply |
+| Author a cloud service with defkit | defkit-author | ACK chosen when no provisioner is named; parameters only from the CRD schema; secrets by reference; server check accepts every object before "ready to apply" |
 | Impact of a definition change | platform-engineer | Three numbers; visibility statement; sample renders grouped |
 | What does the platform offer | developer | Only listed capabilities reported |
 | Follow existing practice | developer | Following practice, across the practice fixtures |
