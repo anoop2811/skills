@@ -118,9 +118,10 @@ If KubeVela is not installed, do not suggest installing it.
    call `list_definitions` with `provides` and the namespace. If one is marked `default`,
    use it and name the alternatives. If only one fits, use it. If several fit and none is
    default, ask the user in chat, showing for each its description, what
-   `explain_definition` says it creates, and how many Applications use it. Definitions
-   without a `provides` label are still candidates: compare their descriptions. Never
-   choose between them silently.
+   `explain_definition` says it creates, and how many Applications use it. The filter
+   also returns unlabelled definitions whose name or description mentions the
+   capability, with `matchedBy` set to `name` or `description`; read their descriptions to
+   confirm they fit before offering them. Never choose between them silently.
 2. **Render before showing.** Call `dryrun_application` with the full Application. If it
    returns field errors, fix them and call it again. Do not show the user YAML that has not
    rendered cleanly, and report the render with the four-line status below.
@@ -139,9 +140,10 @@ If KubeVela is not installed, do not suggest installing it.
    description. In `gated` mode, give the exact resume command and say who can run it. In
    `direct` mode the client shows the user a confirmation the server wrote from the diff;
    never answer it, and never present the step 4 answer as a substitute for it. After acceptance,
-   poll `get_application` and report health and endpoints. If the server refused `direct`
-   because the client cannot prompt, nothing was applied: say so and offer the modes the
-   response names. If it downgraded a HIGH risk change to `gated`, report that mode and the
+   poll `get_application` and report health and endpoints. If the server refused `direct`,
+   whether because the client cannot prompt, the diff used local definitions, the render
+   writes outside the allowed namespaces, or the workflow runs steps the diff cannot see,
+   nothing was applied: say which, and offer `gitops`. If it downgraded a HIGH risk change to `gated`, report that mode and the
    resume command.
 7. **Human approval gates stay with humans.** Never call `resume_workflow`,
    `suspend_workflow` or `terminate_workflow`, whether or not the user asks. Give the
