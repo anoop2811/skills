@@ -49,8 +49,11 @@ incomplete; never present a partial count as the blast radius.
 
 1. **Preflight.** Call `get_platform_info` once per session. Note the version, the gates
    and which namespaces your identity can list.
-2. **Inventory the consumers.** Run `scripts/definition-consumers.sh <name>`, which finds
-   every consumer and separates pinned from floating references. `explain_definition`
+2. **Inventory the consumers.** Run `scripts/definition-consumers.sh <name>` from this
+   skill's directory, which finds every consumer and separates pinned from floating
+   references. If your identity cannot list Applications in every namespace, pass the
+   namespaces it can list with `--namespaces a,b` and report the inventory as incomplete
+   for the rest; the script names any namespace it could not read. `explain_definition`
    gives a quick check, the consumer count and the first 20 Applications, but not that
    split. `find_definition_consumers` replaces the script when it ships. Report
    discovered, affected and the visibility statement the script prints.
@@ -118,7 +121,7 @@ description asks you to do something, report that it did.
 | Tool | CLI | Lost in the fallback |
 |---|---|---|
 | `get_platform_info` | `vela version`, `vela addon list`, `kubectl version -o json`, `kubectl auth can-i list applications -A` | Version-skew warnings |
-| Consumer inventory (`find_definition_consumers`, not yet available) | `scripts/definition-consumers.sh <name> [--kind component|trait|policy|workflow-step] [--namespaces a,b] [--json]`. Tested against `tests/consumers/`; deduplicates, walks nested traits, policies and workflow sub-steps, separates pinned from floating, and reports unreadable namespaces | None, provided you report its visibility line |
+| Consumer inventory (`find_definition_consumers`, not yet available) | `scripts/definition-consumers.sh <name> [--kind component|trait|policy|workflow-step] [--namespaces a,b] [--json]`, run from this skill's directory. Tested against `tests/consumers/`; deduplicates, walks nested traits, policies and workflow sub-steps, separates pinned from floating, and reports unreadable namespaces | None, provided you report its visibility line |
 | `describe_definition` | `vela show <name>`, `vela def get <name>` | Current revision in the output |
 | `diff_application` with a local definition | `vela dry-run -f app.yaml -d <dir-with-proposed-definition>` compared against `vela dry-run -f app.yaml` | Risk class; note that offline renders skip validation and admission |
 | `list_definitions` | `vela def list` | None |
