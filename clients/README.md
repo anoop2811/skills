@@ -29,7 +29,8 @@ each client's format.
 ## Permissions every snippet assumes
 
 - `vela mcp` starts read-only. `--allow-write` only where the mode policy has been
-  reviewed; `--allow-resume` never outside a single-user sandbox.
+  reviewed. There is no resume tool; a person resumes a paused workflow with
+  `vela workflow resume`.
 - The Kubernetes MCP server runs with a TOML config setting `read_only = true` and
   denying Secret and RBAC kinds; see `../kubevela-sre/servers/kubernetes.md`. It is
   started with `--config`, not with flags.

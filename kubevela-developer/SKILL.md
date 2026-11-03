@@ -140,7 +140,9 @@ If KubeVela is not installed, do not suggest installing it.
    description. In `gated` mode, give the exact resume command and say who can run it. In
    `direct` mode the client shows the user a confirmation the server wrote from the diff;
    never answer it, and never present the step 4 answer as a substitute for it. After acceptance,
-   poll `get_application` and report health and endpoints. If the server refused `direct`,
+   poll `get_application` and report health, and the endpoints from
+   `vela status <name> -n <ns> --endpoint`, which `get_application` does not return yet.
+   If the server refused `direct`,
    whether because the client cannot prompt, the diff used local definitions, the render
    writes outside the allowed namespaces, or the workflow runs steps the diff cannot see,
    nothing was applied: say which, and offer `gitops`. If it downgraded a HIGH risk change to `gated`, report that mode and the
